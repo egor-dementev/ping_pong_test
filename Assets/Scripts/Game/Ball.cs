@@ -8,14 +8,18 @@ namespace PingPong.Game
     [RequireComponent(typeof(NetworkObject))]
     public class Ball : NetworkBehaviour
     {
-        private const float StartVelocity = 2;
-        
         [SerializeField]
         private Rigidbody2D rb;
         [SerializeField]
         private NetworkObject netObject;
+        [SerializeField, Range(1, 10)]
+        private float startVelocity = 2;
+        [SerializeField, Range(.1f, 10)]
+        private float acceleration = .1f;
 
         private bool isInitialized;
+        private Vector2 startDirection;
+        private float curVelocity;
         
         private void OnValidate()
         {
@@ -23,16 +27,23 @@ namespace PingPong.Game
             netObject = GetComponent<NetworkObject>();
         }
 
-        public void InitAndStartMove()
+        public void InitAndStartMove(Vector2 direction)
         {
+            startDirection = direction;
             transform.localPosition = Vector3.zero;
             netObject.Spawn();
         }
 
         public override void OnNetworkSpawn()
         {
-            rb.velocity = Vector2.one * StartVelocity;
+            curVelocity = startVelocity;
+            rb.velocity = GetVelocity(startDirection);
             isInitialized = true;
+        }
+
+        private Vector2 GetVelocity(Vector2 direction)
+        {
+            return direction.normalized * curVelocity;
         }
 
         private void FixedUpdate()
@@ -42,6 +53,20 @@ namespace PingPong.Game
             
             if (!isInitialized)
                 return;
+
+            rb.velocity = GetVelocity(rb.velocity);
+        }
+
+        private void Update()
+        {
+            curVelocity += acceleration * Time.deltaTime;
+        }
+
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            
+            netObject.Despawn();
         }
     }
 }
