@@ -12,7 +12,7 @@ namespace PingPong.OverlayUI
         [SerializeField]
         private OverlayWindow[] windows;
 
-        private Dictionary<Type, OverlayWindow> _windowsByType = new Dictionary<Type, OverlayWindow>();
+        private Dictionary<Type, OverlayWindow> windowsByType = new Dictionary<Type, OverlayWindow>();
 
         private void Awake()
         {
@@ -22,10 +22,10 @@ namespace PingPong.OverlayUI
             {
                 var type = window.GetType();
                 
-                if (_windowsByType.ContainsKey(type))
+                if (windowsByType.ContainsKey(type))
                     continue;
 
-                _windowsByType[type] = window;
+                windowsByType[type] = window;
                 window.Init();
             }
         }
@@ -58,7 +58,7 @@ namespace PingPong.OverlayUI
         {
             var type = typeof(T);
 
-            if (_windowsByType.TryGetValue(type, out var window))
+            if (windowsByType.TryGetValue(type, out var window))
                 return window;
             
             throw new Exception($"There is no overlay window of type {type.Name}");
