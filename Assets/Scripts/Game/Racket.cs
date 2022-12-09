@@ -7,11 +7,8 @@ namespace PingPong.Game
 {
     [RequireComponent(typeof(BoxCollider2D))]
     [RequireComponent(typeof(Rigidbody2D))]
-    [RequireComponent(typeof(NetworkObject))]
-    public class Racket : NetworkBehaviour
+    public class Racket : NetObject<ulong, Action<Racket>>
     {
-        [SerializeField]
-        private NetworkObject netObject;
         [SerializeField, Range(1, 10)]
         private float minMaxPos = 1;
         [SerializeField, Range(1, 10)]
@@ -19,34 +16,14 @@ namespace PingPong.Game
         [SerializeField, Range(.1f, 10)]
         private float acceleration = 1.2f;
 
-        [SerializeField]
         private bool isInitialized;
-        [SerializeField]
         private float destinationX;
-        [SerializeField]
-        private float speed;
-        [SerializeField]
-        private Vector3 myPos;
-
-        public ulong ObjectId => netObject.NetworkObjectId;
-        public ulong ClientId;
-        // public ulong ClientId { get; private set; }
-        
         private Action<Racket> onSpawned;
 
-        [ContextMenu("IsOwner?")]
-        private void CheckIsOwner()
-        {
-            Debug.LogWarning($"{ClientId} is owner [{IsOwner}]-[{netObject.IsOwner}]"
-                             + $"\n{netObject.OwnerClientId} is owner");
-        }
-        
-        private void OnValidate()
-        {
-            netObject = GetComponent<NetworkObject>();
-        }
-        
-        public void Init(ulong clientId, Action<Racket> onSpawned)
+        public ulong ObjectId => netObject.NetworkObjectId;
+        public ulong ClientId { get; private set; }
+
+        public override void Init(ulong clientId, Action<Racket> onSpawned)
         {
             this.ClientId = clientId;
             this.onSpawned = onSpawned;
@@ -55,6 +32,8 @@ namespace PingPong.Game
 
         public override void OnNetworkSpawn()
         {
+            base.OnNetworkSpawn();
+            
             if (IsServer)
                 onSpawned?.Invoke(this);
             
@@ -100,8 +79,8 @@ namespace PingPong.Game
             while (!isInitialized)
                 yield return null;
             
-            // Vector3 myPos;
-            // var speed = 0f;
+            Vector3 myPos;
+            var speed = 0f;
 
             while (true)
             {

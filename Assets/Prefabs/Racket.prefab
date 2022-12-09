@@ -192,8 +192,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   netObject: {fileID: 4295066898878509448}
   minMaxPos: 6
-  maxSpeed: 3
-  acceleration: 1.2
+  maxSpeed: 5
+  acceleration: 2.5
   isInitialized: 0
   destinationX: 0
   speed: 0
